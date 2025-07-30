@@ -1,0 +1,45 @@
+local player = game:GetService("Players").LocalPlayer
+local teamName = player.Team and player.Team.Name
+
+if not teamName then return end
+
+local function scanTycoon()
+    local tycoon = game:GetService("Workspace"):FindFirstChild("Tycoon") and
+                  game.Workspace.Tycoon:FindFirstChild("Tycoons") and
+                  game.Workspace.Tycoon.Tycoons:FindFirstChild(teamName)
+    
+    if not tycoon then return "Tycoon not found for team: "..teamName end
+    
+    local result = {"Objects in "..teamName.."'s Tycoon:"}
+    local objects = {}
+    
+    local function scanFolder(folder, indent)
+        for _, item in ipairs(folder:GetChildren()) do
+            table.insert(objects, string.rep("  ", indent)..item:GetFullName())
+            if item:IsA("Folder") or item:IsA("Model") then
+                scanFolder(item, indent + 1)
+            end
+        end
+    end
+    
+    scanFolder(tycoon, 1)
+    table.insert(result, table.concat(objects, "\n"))
+    return table.concat(result, "\n\n")
+end
+
+local function copyToClipboard(text)
+    local clipboard = setclipboard or toclipboard or set_clipboard or (Clipboard and Clipboard.set)
+    if clipboard then
+        clipboard(text)
+        return true
+    else
+        return false
+    end
+end
+
+local tycoonData = scanTycoon()
+if copyToClipboard(tycoonData) then
+    -- Успешно скопировано
+else
+    -- Функция копирования не найдена
+end
