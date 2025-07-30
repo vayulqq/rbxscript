@@ -1,0 +1,39 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local function getCashCollector()
+    if not player.Team then return nil end
+    local teamName = player.Team.Name
+    local tycoons = game:GetService("Workspace"):FindFirstChild("Tycoon") and 
+                   game.Workspace.Tycoon:FindFirstChild("Tycoons")
+    
+    if not tycoons then return nil end
+    
+    local tycoon = tycoons:FindFirstChild(teamName)
+    if not tycoon then return nil end
+    
+    local essentials = tycoon:FindFirstChild("Essentials")
+    if not essentials then return nil end
+    
+    return essentials:FindFirstChild("CashCollector") or 
+           essentials:FindFirstChild("CashCollector") or
+           essentials:FindFirstChildWhichIsA("Model")
+end
+
+local function teleportTo(target)
+    if not target then return end
+    
+    local teleportPart
+    if target:IsA("BasePart") then
+        teleportPart = target
+    else
+        teleportPart = target.PrimaryPart or target:FindFirstChildWhichIsA("BasePart", true)
+    end
+    
+    if teleportPart then
+        humanoidRootPart.CFrame = teleportPart.CFrame + Vector3.new(0, 3, 0)
+    end
+end
+
+teleportTo(getCashCollector())
