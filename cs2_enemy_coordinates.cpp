@@ -60,7 +60,7 @@ uintptr_t GetModuleBaseAddress(DWORD procId, const char* modName) {
         modEntry.dwSize = sizeof(modEntry);
         if (Module32First(hSnap, &modEntry)) {
             do {
-                if (WcharToString(modEntry.szModule) == std::string(modName)) {
+                if (WcharToString(modEntry.szModule) == modName) {
                     modBaseAddr = (uintptr_t)modEntry.modBaseAddr;
                     break;
                 }
