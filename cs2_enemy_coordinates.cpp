@@ -1,5 +1,3 @@
-#define UNICODE
-#define _UNICODE
 #include <Windows.h>
 #include <TlHelp32.h>
 #include <iostream>
@@ -149,4 +147,5 @@ int main() {
 
     CloseHandle(hProcess);
     return 0;
+
 }
