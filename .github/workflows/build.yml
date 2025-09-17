@@ -21,7 +21,7 @@ jobs:
 
     - name: Compile with MSVC
       run: |
-        cl /EHsc /std:c++17 cs2_enemy_coordinates.cpp /link /out:cs2_enemy_coordinates.exe
+        cl /EHsc /std:c++17 cs2_enemy_coordinates.cpp /link /out:cs2_enemy_coordinates.exe user32.lib kernel32.lib
       shell: cmd
 
     - name: Upload artifact
