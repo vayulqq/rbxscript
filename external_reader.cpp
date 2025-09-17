@@ -53,7 +53,7 @@ std::uintptr_t ScanForSignature(HANDLE hProcess, const std::string& sig) {
             const SIZE_T chunkMax = 1024 * 1024;
             SIZE_T offset = 0;
             while (offset < regionSize) {
-                SIZE_T toRead = (SIZE_T)min< SIZE_T >(chunkMax, regionSize - offset);
+                SIZE_T toRead = std::min<SIZE_T>(chunkMax, regionSize - offset);
                 std::vector<char> buffer(toRead);
                 SIZE_T bytesRead = 0;
                 if (ReadProcessMemory(hProcess, (LPCVOID)((std::uintptr_t)mbi.BaseAddress + offset), buffer.data(), toRead, &bytesRead) && bytesRead > 0) {
