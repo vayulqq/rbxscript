@@ -16,35 +16,13 @@ struct DemoEntity {
     int team;
     int health;
     float x, y, z;
-    bool isActive; // реально на карте
-    char name[32]; // имя игрока
+    bool isActive;       // реально на карте
+    char name[32];       // имя игрока
 };
 #pragma pack(pop)
 
-// при инициализации
-for (int i = 0; i < ENTITY_COUNT; ++i) {
-    entities[i].id = i;
-    entities[i].team = (i == 0) ? 1 : ((i % 2) ? 1 : 2); // локальный игрок = team 1, противники = team 2
-    entities[i].health = hpDist(rng);
-    entities[i].x = posDist(rng);
-    entities[i].y = posDist(rng);
-    entities[i].z = posDist(rng);
-
-    // активны только реально существующие игроки
-    entities[i].isActive = (i == 0 || entities[i].team != 1);
-
-    // задаем имена
-    if (i == 0) {
-        strcpy_s(entities[i].name, "LocalPlayer");
-    } else if (entities[i].team != 1) {
-        sprintf_s(entities[i].name, "Enemy_%d", i);
-    } else {
-        entities[i].name[0] = '\0'; // союзники не активны, можно оставить пустое имя
-    }
-}
-
-const char SIG[] = "DEMO_ENTITY_LIST_V1"; // подпись, которую будет искать экстернал
-const size_t SIG_LEN = sizeof(SIG) - 1;   // без нуль-терминатора
+const char SIG[] = "DEMO_ENTITY_LIST_V1"; // подпись для экстернала
+const size_t SIG_LEN = sizeof(SIG) - 1;   
 const int ENTITY_COUNT = 64;
 
 LRESULT CALLBACK DummyWndProc(HWND hWnd, UINT msg, WPARAM w, LPARAM l) {
@@ -53,7 +31,7 @@ LRESULT CALLBACK DummyWndProc(HWND hWnd, UINT msg, WPARAM w, LPARAM l) {
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-    // Регистрация простого класса окна, чтобы можно было найти по имени "Demo Game"
+    // Регистрация класса окна
     WNDCLASSA wc{};
     wc.lpfnWndProc = DummyWndProc;
     wc.hInstance = GetModuleHandleA(nullptr);
@@ -62,7 +40,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     HWND hwnd = CreateWindowA("DemoGameClass", "Demo Game", WS_OVERLAPPEDWINDOW,
                               CW_USEDEFAULT, CW_USEDEFAULT, 300, 200,
                               nullptr, nullptr, wc.hInstance, nullptr);
-    ShowWindow(hwnd, SW_HIDE); // можно скрыть окно
+    ShowWindow(hwnd, SW_HIDE); // окно скрыто
 
     std::cout << "Demo Game starting. Window title: \"Demo Game\"\n";
 
@@ -81,45 +59,45 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // Записываем подпись
     memcpy(block, SIG, SIG_LEN);
-    // count
     int* pCount = (int*)((char*)block + SIG_LEN);
     *pCount = ENTITY_COUNT;
-    // entities start
+
     DemoEntity* entities = (DemoEntity*)((char*)block + SIG_LEN + sizeof(int));
 
     for (int i = 0; i < ENTITY_COUNT; ++i) {
-    entities[i].id = i;
-    
-    // локальный игрок = id 0, team 1
-    entities[i].team = (i == 0) ? 1 : ((i % 2) ? 1 : 2); // team 1 = союзники, team 2 = противники
-    
-    entities[i].health = hpDist(rng);
-    entities[i].x = posDist(rng);
-    entities[i].y = posDist(rng);
-    entities[i].z = posDist(rng);
+        entities[i].id = i;
+        entities[i].team = (i == 0) ? 1 : ((i % 2) ? 1 : 2); // локальный игрок = team 1, противники = team 2
+        entities[i].health = hpDist(rng);
+        entities[i].x = posDist(rng);
+        entities[i].y = posDist(rng);
+        entities[i].z = posDist(rng);
 
-    // активны только реально существующие игроки: локал + все противники (team != локальный)
-    if (i == 0 || entities[i].team != 1)
-        entities[i].isActive = true;
-    else
-        entities[i].isActive = false;
-}
+        // активны только реально существующие игроки
+        entities[i].isActive = (i == 0 || entities[i].team != 1);
+
+        // задаем имена
+        if (i == 0) {
+            strcpy_s(entities[i].name, "LocalPlayer");
+        } else if (entities[i].team != 1) {
+            sprintf_s(entities[i].name, "Enemy_%d", i);
+        } else {
+            entities[i].name[0] = '\0';
+        }
+    }
 
     std::cout << "Memory block at: " << block << " (size " << blockSize << " bytes)\n";
     std::cout << "PID: " << GetCurrentProcessId() << "\n";
     std::cout << "Press Ctrl+C in console to stop demo (or close window)." << std::endl;
 
-    // Обновляем сущности в цикле
+    // Цикл обновления сущностей
     bool running = true;
     int tick = 0;
     while (running) {
-        // обновляем: простая волнообразная позиция и урон/лечение
         for (int i = 0; i < ENTITY_COUNT; ++i) {
             entities[i].x += 5.0f * sinf((tick + i) * 0.02f);
             entities[i].y += 3.0f * cosf((tick + i) * 0.015f);
             entities[i].z += 1.0f * sinf((tick + i) * 0.01f);
 
-            // случайные изменения HP
             if ((tick + i) % 50 == 0) {
                 entities[i].health += (i % 7 == 0) ? -10 : 2;
                 if (entities[i].health > 100) entities[i].health = 100;
@@ -127,18 +105,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             }
         }
 
-        // Демонстрация: иногда меняем команды
+        // иногда меняем команды
         if (tick % 1000 == 0) {
             for (int i = 1; i < ENTITY_COUNT; i += 13) {
-                entities[i].team = 3 - entities[i].team; // swap 1<->2
+                entities[i].team = 3 - entities[i].team;
             }
         }
 
-        // Задержка
         std::this_thread::sleep_for(std::chrono::milliseconds(120));
         tick++;
 
-        // Обработка сообщений окна (чтобы приложение корректно завершалось при закрытии)
         MSG msg;
         while (PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE)) {
             if (msg.message == WM_QUIT) running = false;
@@ -152,7 +128,3 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     UnregisterClassA("DemoGameClass", wc.hInstance);
     return 0;
 }
-
-
-
-
