@@ -79,13 +79,14 @@ uintptr_t GetEntity(uintptr_t entityList, int index) {
 }
 
 int main() {
-    // Find CS2 window and process ID
+    // Ищем окно CS2
     HWND hwnd = FindWindowA(NULL, "Counter-Strike 2");
     if (!hwnd) {
         std::cerr << "CS2 window not found!" << std::endl;
         return 1;
     }
 
+    // Получаем PID процесса
     DWORD procId = 0;
     GetWindowThreadProcessId(hwnd, &procId);
     if (procId == 0) {
@@ -93,14 +94,14 @@ int main() {
         return 1;
     }
 
-    // Open process
+    // Открываем процесс
     hProcess = OpenProcess(PROCESS_VM_READ, FALSE, procId);
     if (!hProcess) {
         std::cerr << "Failed to open CS2 process! Run as administrator." << std::endl;
         return 1;
     }
 
-    // Get client.dll base address
+    // Получаем base address client.dll
     uintptr_t clientBase = GetModuleBaseAddress(procId, "client.dll");
     if (!clientBase) {
         std::cerr << "Failed to find client.dll base address!" << std::endl;
@@ -108,54 +109,58 @@ int main() {
         return 1;
     }
 
-    // Read entity list
-    uintptr_t entityList = ReadMemory<uintptr_t>(clientBase + cs2_dumper::offsets::client_dll::dwEntityList);
-    if (!entityList) {
-        std::cerr << "Entity list not found!" << std::endl;
-        CloseHandle(hProcess);
-        return 1;
-    }
+    // Бесконечный цикл
+    while (true) {
+        // Читаем entity list
+        uintptr_t entityList = ReadMemory<uintptr_t>(clientBase + cs2_dumper::offsets::client_dll::dwEntityList);
+        if (!entityList) {
+            std::cerr << "Entity list not found!" << std::endl;
+            break;
+        }
 
-    // Read local player controller
-    uintptr_t localPlayerController = ReadMemory<uintptr_t>(clientBase + cs2_dumper::offsets::client_dll::dwLocalPlayerController);
-    if (!localPlayerController) {
-        std::cerr << "Local player controller not found!" << std::endl;
-        CloseHandle(hProcess);
-        return 1;
-    }
+        // Читаем контроллер локального игрока
+        uintptr_t localPlayerController = ReadMemory<uintptr_t>(clientBase + cs2_dumper::offsets::client_dll::dwLocalPlayerController);
+        if (!localPlayerController) {
+            std::cerr << "Local player controller not found!" << std::endl;
+            break;
+        }
 
-    // Get local team
-    BYTE localTeam = ReadMemory<BYTE>(localPlayerController + cs2_dumper::offsets::m_iTeamNum);
+        // Получаем команду локального игрока
+        BYTE localTeam = ReadMemory<BYTE>(localPlayerController + cs2_dumper::offsets::m_iTeamNum);
 
-    // Loop through entities (players 1 to 64)
-    for (int i = 1; i < 65; ++i) {
-        uintptr_t controller = GetEntity(entityList, i);
-        if (!controller) continue;
+        system("cls"); // очищаем экран
+        std::cout << "=== Enemy Coordinates ===" << std::endl;
 
-        // Read team
-        BYTE team = ReadMemory<BYTE>(controller + cs2_dumper::offsets::m_iTeamNum);
-        if (team == localTeam || team == 0) continue; // Skip teammates and invalid
+        // Перебор игроков
+        for (int i = 1; i < 65; ++i) {
+            uintptr_t controller = GetEntity(entityList, i);
+            if (!controller) continue;
 
-        // Read player pawn
-        uintptr_t playerPawn = ReadMemory<uintptr_t>(controller + cs2_dumper::offsets::m_hPlayerPawn);
-        if (!playerPawn) continue;
+            BYTE team = ReadMemory<BYTE>(controller + cs2_dumper::offsets::m_iTeamNum);
+            if (team == localTeam || team == 0) continue;
 
-        // Read health
-        int health = ReadMemory<int>(playerPawn + cs2_dumper::offsets::C_BaseEntity::m_iHealth);
-        if (health < 1 || health > 100) continue; // Skip dead or invalid
+            uintptr_t playerPawn = ReadMemory<uintptr_t>(controller + cs2_dumper::offsets::m_hPlayerPawn);
+            if (!playerPawn) continue;
 
-        // Read game scene node
-        uintptr_t gameSceneNode = ReadMemory<uintptr_t>(playerPawn + cs2_dumper::offsets::C_BaseEntity::m_pGameSceneNode);
-        if (!gameSceneNode) continue;
+            int health = ReadMemory<int>(playerPawn + cs2_dumper::offsets::C_BaseEntity::m_iHealth);
+            if (health < 1 || health > 100) continue;
 
-        // Read XYZ coordinates
-        Vector3 coords = ReadMemory<Vector3>(gameSceneNode + cs2_dumper::offsets::CGameSceneNode::m_vecOrigin);
+            uintptr_t gameSceneNode = ReadMemory<uintptr_t>(playerPawn + cs2_dumper::offsets::C_BaseEntity::m_pGameSceneNode);
+            if (!gameSceneNode) continue;
 
-        // Output to console
-        std::cout << "Enemy " << i << " XYZ: (" << coords.x << ", " << coords.y << ", " << coords.z << ")" << std::endl;
+            Vector3 coords = ReadMemory<Vector3>(gameSceneNode + cs2_dumper::offsets::CGameSceneNode::m_vecOrigin);
+
+            std::cout << "Enemy " << i
+                      << " | HP: " << health
+                      << " | XYZ: (" << coords.x << ", " << coords.y << ", " << coords.z << ")"
+                      << std::endl;
+        }
+
+        Sleep(1000); // обновляем раз в секунду (можно уменьшить до 100 мс)
     }
 
     CloseHandle(hProcess);
     return 0;
 }
+
 
