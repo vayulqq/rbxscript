@@ -65,14 +65,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     DemoEntity* entities = (DemoEntity*)((char*)block + SIG_LEN + sizeof(int));
 
     for (int i = 0; i < ENTITY_COUNT; ++i) {
-        entities[i].id = i;
-        entities[i].team = (i == 0) ? 1 : ((i % 2) ? 1 : 2); // id 0 — локальный игрок (team 1)
-        entities[i].health = hpDist(rng);
-        entities[i].x = posDist(rng);
-        entities[i].y = posDist(rng);
-        entities[i].z = posDist(rng);
+    entities[i].id = i;
+    
+    // локальный игрок = id 0, team 1
+    entities[i].team = (i == 0) ? 1 : ((i % 2) ? 1 : 2); // team 1 = союзники, team 2 = противники
+    
+    entities[i].health = hpDist(rng);
+    entities[i].x = posDist(rng);
+    entities[i].y = posDist(rng);
+    entities[i].z = posDist(rng);
+
+    // активны только реально существующие игроки: локал + все противники (team != локальный)
+    if (i == 0 || entities[i].team != 1)
         entities[i].isActive = true;
-    }
+    else
+        entities[i].isActive = false;
+}
 
     std::cout << "Memory block at: " << block << " (size " << blockSize << " bytes)\n";
     std::cout << "PID: " << GetCurrentProcessId() << "\n";
@@ -121,6 +129,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     UnregisterClassA("DemoGameClass", wc.hInstance);
     return 0;
 }
+
 
 
 
