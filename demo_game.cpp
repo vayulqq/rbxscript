@@ -1,7 +1,3 @@
-// demo_game.cpp
-// Симулятор "игры" — выделяет блок памяти со служебной подписью и списком сущностей.
-// Запуск: скомпилировать и запустить; оставляет окно с заголовком "Demo Game".
-
 #include <windows.h>
 #include <iostream>
 #include <vector>
@@ -16,13 +12,13 @@ struct DemoEntity {
     int team;
     int health;
     float x, y, z;
-    bool isActive;       // реально на карте
-    char name[32];       // имя игрока
+    bool isActive;
+    char name[128]; // добавляем имя сразу
 };
 #pragma pack(pop)
 
-const char SIG[] = "DEMO_ENTITY_LIST_V1"; // подпись для экстернала
-const size_t SIG_LEN = sizeof(SIG) - 1;   
+const char SIG[] = "DEMO_ENTITY_LIST_V1";
+const size_t SIG_LEN = sizeof(SIG) - 1;
 const int ENTITY_COUNT = 64;
 
 LRESULT CALLBACK DummyWndProc(HWND hWnd, UINT msg, WPARAM w, LPARAM l) {
@@ -31,7 +27,6 @@ LRESULT CALLBACK DummyWndProc(HWND hWnd, UINT msg, WPARAM w, LPARAM l) {
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-    // Регистрация класса окна
     WNDCLASSA wc{};
     wc.lpfnWndProc = DummyWndProc;
     wc.hInstance = GetModuleHandleA(nullptr);
@@ -40,56 +35,39 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     HWND hwnd = CreateWindowA("DemoGameClass", "Demo Game", WS_OVERLAPPEDWINDOW,
                               CW_USEDEFAULT, CW_USEDEFAULT, 300, 200,
                               nullptr, nullptr, wc.hInstance, nullptr);
-    ShowWindow(hwnd, SW_HIDE); // окно скрыто
+    ShowWindow(hwnd, SW_HIDE);
 
     std::cout << "Demo Game starting. Window title: \"Demo Game\"\n";
 
-    // Выделяем блок памяти: [SIG][count:int][array of DemoEntity]
+    // Выделяем память
     size_t blockSize = SIG_LEN + sizeof(int) + ENTITY_COUNT * sizeof(DemoEntity);
     void* block = VirtualAlloc(nullptr, blockSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    if (!block) {
-        std::cerr << "VirtualAlloc failed\n";
-        return 1;
-    }
+    if (!block) return 1;
 
-    // Инициализация сущностей
+    // Инициализация
     std::default_random_engine rng((unsigned)GetTickCount());
     std::uniform_real_distribution<float> posDist(-1000.0f, 1000.0f);
     std::uniform_int_distribution<int> hpDist(40, 100);
 
-    // Записываем подпись
     memcpy(block, SIG, SIG_LEN);
     int* pCount = (int*)((char*)block + SIG_LEN);
     *pCount = ENTITY_COUNT;
-
     DemoEntity* entities = (DemoEntity*)((char*)block + SIG_LEN + sizeof(int));
 
     for (int i = 0; i < ENTITY_COUNT; ++i) {
         entities[i].id = i;
-        entities[i].team = (i == 0) ? 1 : ((i % 2) ? 1 : 2); // локальный игрок = team 1, противники = team 2
+        entities[i].team = (i == 0) ? 1 : ((i % 2) ? 1 : 2);
         entities[i].health = hpDist(rng);
         entities[i].x = posDist(rng);
         entities[i].y = posDist(rng);
         entities[i].z = posDist(rng);
-
-        // активны только реально существующие игроки
-        entities[i].isActive = (i == 0 || entities[i].team != 1);
-
-        // задаем имена
-        if (i == 0) {
-            strcpy_s(entities[i].name, "LocalPlayer");
-        } else if (entities[i].team != 1) {
-            sprintf_s(entities[i].name, "Enemy_%d", i);
-        } else {
-            entities[i].name[0] = '\0';
-        }
+        entities[i].isActive = (i != 0); // только враги активны кроме локального игрока
+        snprintf(entities[i].name, sizeof(entities[i].name), "Enemy_%d", i);
     }
 
     std::cout << "Memory block at: " << block << " (size " << blockSize << " bytes)\n";
-    std::cout << "PID: " << GetCurrentProcessId() << "\n";
-    std::cout << "Press Ctrl+C in console to stop demo (or close window)." << std::endl;
+    std::cout << "PID: " << GetCurrentProcessId() << "\nPress Ctrl+C to stop.\n";
 
-    // Цикл обновления сущностей
     bool running = true;
     int tick = 0;
     while (running) {
@@ -105,11 +83,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             }
         }
 
-        // иногда меняем команды
         if (tick % 1000 == 0) {
-            for (int i = 1; i < ENTITY_COUNT; i += 13) {
+            for (int i = 1; i < ENTITY_COUNT; i += 13)
                 entities[i].team = 3 - entities[i].team;
-            }
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(120));
