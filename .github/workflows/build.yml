@@ -1,4 +1,4 @@
-name: Build CS2 Enemy Coordinates
+name: Build Demo and External Reader
 
 on:
   push:
@@ -11,21 +11,36 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x64
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
-    - name: Compile with MSVC
-      run: |
-        cl /EHsc /std:c++17 cs2_enemy_coordinates.cpp /link /out:cs2_enemy_coordinates.exe user32.lib kernel32.lib
-      shell: cmd
+      - name: Compile demo_game.cpp
+        run: |
+          cl /EHsc /std:c++17 demo_game.cpp /link user32.lib kernel32.lib
+        shell: cmd
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: cs2_enemy_coordinates
-        path: cs2_enemy_coordinates.exe
+      - name: Compile external_reader.cpp
+        run: |
+          cl /EHsc /std:c++17 external_reader.cpp /link user32.lib kernel32.lib
+        shell: cmd
+
+      - name: List binaries
+        run: dir
+        shell: cmd
+
+      - name: Upload demo_game artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo_game
+          path: demo_game.exe
+
+      - name: Upload external_reader artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: external_reader
+          path: external_reader.exe
