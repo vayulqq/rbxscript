@@ -43,6 +43,15 @@ T ReadMemory(uintptr_t address) {
     return buffer;
 }
 
+// Function to convert WCHAR to std::string
+std::string WcharToString(const WCHAR* wcharStr) {
+    if (!wcharStr) return "";
+    int size = WideCharToMultiByte(CP_UTF8, 0, wcharStr, -1, nullptr, 0, nullptr, nullptr);
+    std::string str(size, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wcharStr, -1, &str[0], size, nullptr, nullptr);
+    return str.substr(0, str.size() - 1); // Remove null terminator
+}
+
 uintptr_t GetModuleBaseAddress(DWORD procId, const char* modName) {
     uintptr_t modBaseAddr = 0;
     HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, procId);
@@ -51,14 +60,14 @@ uintptr_t GetModuleBaseAddress(DWORD procId, const char* modName) {
         modEntry.dwSize = sizeof(modEntry);
         if (Module32First(hSnap, &modEntry)) {
             do {
-                if (std::string(modEntry.szModule) == std::string(modName)) {
+                if (WcharToString(modEntry.szModule) == modName) {
                     modBaseAddr = (uintptr_t)modEntry.modBaseAddr;
                     break;
                 }
             } while (Module32Next(hSnap, &modEntry));
         }
+        CloseHandle(hSnap);
     }
-    CloseHandle(hSnap);
     return modBaseAddr;
 }
 
@@ -147,5 +156,4 @@ int main() {
 
     CloseHandle(hProcess);
     return 0;
-
 }
