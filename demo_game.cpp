@@ -13,9 +13,10 @@
 #pragma pack(push, 1)
 struct DemoEntity {
     int id;
-    int team;   // 1 or 2
-    int health; // 0..100
+    int team;
+    int health;
     float x, y, z;
+    bool isActive; // true = реально на карте
 };
 #pragma pack(pop)
 
@@ -119,3 +120,4 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     UnregisterClassA("DemoGameClass", wc.hInstance);
     return 0;
 }
+
