@@ -60,7 +60,7 @@ uintptr_t GetModuleBaseAddress(DWORD procId, const char* modName) {
         modEntry.dwSize = sizeof(modEntry);
         if (Module32First(hSnap, &modEntry)) {
             do {
-                if (WcharToString(modEntry.szModule) == modName) {
+                if (_stricmp(modEntry.szModule, modName) == 0) { // Case-insensitive comparison
                     modBaseAddr = (uintptr_t)modEntry.modBaseAddr;
                     break;
                 }
@@ -70,6 +70,7 @@ uintptr_t GetModuleBaseAddress(DWORD procId, const char* modName) {
     }
     return modBaseAddr;
 }
+
 
 uintptr_t GetEntity(uintptr_t entityList, int index) {
     uintptr_t listEntry = ReadMemory<uintptr_t>(entityList + 0x8 * ((index & 0x7FFF) >> 9) + 0x10);
@@ -157,3 +158,4 @@ int main() {
     CloseHandle(hProcess);
     return 0;
 }
+
