@@ -2,13 +2,13 @@
 // "Экстернал" для demo_game: находит окно "Demo Game", открывает процесс,
 // сканирует память на подпись и читает список сущностей в бесконечном цикле.
 // Форматирует вывод, подсвечивает по здоровью и фильтрует союзников.
-
+#include <algorithm>
+#include <sstream>
 #include <windows.h>
 #include <tlhelp32.h>
 #include <iostream>
 #include <vector>
 #include <string>
-#include <algorithm>
 #include <chrono>
 #include <thread>
 #include <iomanip>
