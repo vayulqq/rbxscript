@@ -161,7 +161,9 @@ int main() {
 
             // читаем имя игрока
             char nameBuffer[128] = {0};
-            ReadProcessMemory(hProcess, (LPCVOID)((std::uintptr_t)&e + m_iszPlayerName), nameBuffer, sizeof(nameBuffer), nullptr);
+            std::uintptr_t entityAddr = entitiesBase + i * sizeof(DemoEntity);
+            ReadProcessMemory(hProcess, (LPCVOID)(entityAddr + m_iszPlayerName), nameBuffer, sizeof(nameBuffer), nullptr);
+
             enemies.push_back(e);
             enemyNames.push_back(std::string(nameBuffer));
         }
