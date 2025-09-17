@@ -71,7 +71,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         entities[i].x = posDist(rng);
         entities[i].y = posDist(rng);
         entities[i].z = posDist(rng);
-        entities[i].isActive = (i == 0); 
+        entities[i].isActive = true;
     }
 
     std::cout << "Memory block at: " << block << " (size " << blockSize << " bytes)\n";
@@ -121,5 +121,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     UnregisterClassA("DemoGameClass", wc.hInstance);
     return 0;
 }
+
 
 
