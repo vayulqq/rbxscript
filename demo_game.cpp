@@ -16,9 +16,32 @@ struct DemoEntity {
     int team;
     int health;
     float x, y, z;
-    bool isActive; // true = реально на карте
+    bool isActive; // реально на карте
+    char name[32]; // имя игрока
 };
 #pragma pack(pop)
+
+// при инициализации
+for (int i = 0; i < ENTITY_COUNT; ++i) {
+    entities[i].id = i;
+    entities[i].team = (i == 0) ? 1 : ((i % 2) ? 1 : 2); // локальный игрок = team 1, противники = team 2
+    entities[i].health = hpDist(rng);
+    entities[i].x = posDist(rng);
+    entities[i].y = posDist(rng);
+    entities[i].z = posDist(rng);
+
+    // активны только реально существующие игроки
+    entities[i].isActive = (i == 0 || entities[i].team != 1);
+
+    // задаем имена
+    if (i == 0) {
+        strcpy_s(entities[i].name, "LocalPlayer");
+    } else if (entities[i].team != 1) {
+        sprintf_s(entities[i].name, "Enemy_%d", i);
+    } else {
+        entities[i].name[0] = '\0'; // союзники не активны, можно оставить пустое имя
+    }
+}
 
 const char SIG[] = "DEMO_ENTITY_LIST_V1"; // подпись, которую будет искать экстернал
 const size_t SIG_LEN = sizeof(SIG) - 1;   // без нуль-терминатора

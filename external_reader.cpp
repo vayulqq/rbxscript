@@ -191,22 +191,23 @@ int main() {
         std::cout << "---------------------------------------------\n";
 
         for (const auto& e : enemies) {
-            double dist = Distance(local, e);
-            // color by HP
-            SetColorForHP(hConsole, e.health);
+    double dist = Distance(local, e);
+    SetColorForHP(hConsole, e.health);
 
-            std::ostringstream pososs;
-            pososs << "(" << std::fixed << std::setprecision(1) << e.x << ", " << e.y << ", " << e.z << ")";
+    std::ostringstream pososs;
+    pososs << "(" << std::fixed << std::setprecision(1) << e.x << ", "
+            << e.y << ", " << e.z << ")";
 
-            std::cout << std::left << std::setw(6) << e.id
-                      << std::setw(6) << e.health
-                      << std::setw(10) << std::fixed << std::setprecision(1) << dist
-                      << std::setw(20) << pososs.str()
-                      << "\n";
+    std::cout << std::left << std::setw(6) << e.id
+              << std::setw(10) << e.name
+              << std::setw(6) << e.health
+              << std::setw(10) << std::fixed << std::setprecision(1) << dist
+              << std::setw(20) << pososs.str()
+              << "\n";
 
-            // reset color
-            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-        }
+    SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+}
+
 
         std::cout << "---------------------------------------------\n";
         std::cout << "Enemies: " << enemies.size() << "   (Press Ctrl+C to quit)\n";
