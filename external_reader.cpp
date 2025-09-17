@@ -20,7 +20,9 @@ struct DemoEntity {
     int team;
     int health;
     float x, y, z;
+    bool isActive; // true = реально на карте
 };
+
 #pragma pack(pop)
 
 const char SIG[] = "DEMO_ENTITY_LIST_V1";
@@ -165,6 +167,7 @@ int main() {
             if (e.team == 0) continue;
             if (e.team == localTeam) continue; // союзник
             if (e.health <= 0) continue;
+            if (!e.isActive) continue; // <-- добавляем фильтр по активности
             enemies.push_back(e);
         }
 
