@@ -1,5 +1,5 @@
 // Generated using https://github.com/a2x/cs2-dumper
-// 2025-09-20 07:38:52.080831100 UTC
+// 2025-09-21 12:54:43.021356100 UTC
 
 namespace CS2Dumper.Schemas {
     // Module: engine2.dll
@@ -40,7 +40,7 @@ namespace CS2Dumper.Schemas {
             public const nint m_nTotalTicksThisFrame = 0x38; // int32
             public const nint m_nTotalTicks = 0x3C; // int32
         }
-        // Parent: None
+        // Parent: 
         // Field count: 1
         public static class CEntityIOOutput {
             public const nint m_Value = 0x18; // CVariantBase<CVariantDefaultAllocator>
