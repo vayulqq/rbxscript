@@ -5804,15 +5804,6 @@
         "parent": null
       }
     },
-    "enums": {
-      "__8i__": {
-        "alignment": 0,
-        "members": {
-          "": 17179869186,
-          "\u0018!9i�": 0
-        },
-        "type": "unknown"
-      }
-    }
+    "enums": {}
   }
 }
