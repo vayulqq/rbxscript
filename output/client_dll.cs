@@ -1,16 +1,11 @@
 // Generated using https://github.com/a2x/cs2-dumper
-// 2025-10-24 14:03:22.518614200 UTC
+// 2025-10-24 14:07:25.046932400 UTC
 
 namespace CS2Dumper.Schemas {
     // Module: client.dll
     // Class count: 212
-    // Enum count: 4
+    // Enum count: 1
     public static class ClientDll {
-        // Alignment: 1
-        // Member count: 0
-        public enum _ : byte {
-
-        }
         // Parent: C_Inferno
         // Field count: 0
         public static class C_FireCrackerBlast {

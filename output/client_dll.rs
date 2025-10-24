@@ -1,5 +1,5 @@
 // Generated using https://github.com/a2x/cs2-dumper
-// 2025-10-24 14:03:22.518614200 UTC
+// 2025-10-24 14:07:25.046932400 UTC
 
 #![allow(non_upper_case_globals, non_camel_case_types, non_snake_case, unused)]
 
@@ -7,14 +7,8 @@ pub mod cs2_dumper {
     pub mod schemas {
         // Module: client.dll
         // Class count: 212
-        // Enum count: 4
+        // Enum count: 1
         pub mod client_dll {
-            // Alignment: 1
-            // Member count: 0
-            #[repr(u8)]
-            pub enum _ {
-
-            }
             // Parent: C_Inferno
             // Field count: 0
             pub mod C_FireCrackerBlast {

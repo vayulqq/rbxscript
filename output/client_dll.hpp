@@ -1,5 +1,5 @@
 // Generated using https://github.com/a2x/cs2-dumper
-// 2025-10-24 14:03:22.518614200 UTC
+// 2025-10-24 14:07:25.046932400 UTC
 
 #pragma once
 
@@ -9,13 +9,8 @@ namespace cs2_dumper {
     namespace schemas {
         // Module: client.dll
         // Class count: 212
-        // Enum count: 4
+        // Enum count: 1
         namespace client_dll {
-            // Alignment: 1
-            // Member count: 0
-            enum class _ : uint8_t {
-
-            };
             // Parent: C_Inferno
             // Field count: 0
             namespace C_FireCrackerBlast {
